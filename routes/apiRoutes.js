@@ -3,8 +3,7 @@ const router = express.Router();
 
 // Controllers
 const UserController = require('../app/Controllers/UserController');
-const ItemController = require('../app/Controllers/ItemController');
-const BannerController = require('../app/Controllers/BannerController');
+const TaskController = require('../app/Controllers/TaskController');
 
 // Group routes for users
 router.route('/users')
@@ -17,9 +16,15 @@ router.route('/users/:id')
     .delete(UserController.deleteUser);    
 
 //Group routes for items
-router.get('/items', ItemController.getItems); // Get all items
 
-router.get('/banners/hero', BannerController.getHomeBanner);  // Hero banner for homepage
-router.get('/banners/m/hero', BannerController.getHomeBanner); // Hero banner for mobile view
+router.route('/tasks')
+    .get(TaskController.taskList);        
+
+
+// router.route('/tasks/:id')
+//     .get(TaskController.getUserById)         
+//     .put(TaskController.updateUser)         
+//     .delete(TaskController.deleteUser);    
+
 
 module.exports = router;

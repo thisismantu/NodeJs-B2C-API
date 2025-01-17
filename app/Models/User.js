@@ -1,7 +1,18 @@
+const bcrypt = require('bcryptjs');
 const db = require('../../config/db');
 const { getPrefixedTableName } = require('../../config/dbUtils');
 // const paginate  = require('../../config/pagination');
 
+const loginUsers = async () => {
+    try {
+
+        const tableName = getPrefixedTableName('users');
+        const [queryResponse] = await db.query(`SELECT * FROM \`${tableName}\` LIMIT 10`);
+        return queryResponse;
+    } catch (err) {
+        throw new Error(err.message);
+    }
+};
 
 const getAllUsers = async () => {
     try {
@@ -26,9 +37,13 @@ const getUserById = async (id) => {
 
 const createUser = async (userData) => {
     try {
-        const { first_name, last_name, mobile, email, password, access_password } = userData;
+        // Destructure user data
+        const { name, mobile, email, password } = userData;
 
-        // Check if the mobile number already exists
+        // Hash passwords before storing them
+        const hashedPassword = await bcrypt.hash(password, 10);  // Hash the main password
+        
+        // Check if the mobile number or email already exists in the database
         const [existingUser] = await db.query(
             'SELECT `id` FROM `users` WHERE `mobile` = ? OR `email` = ?',
             [mobile, email]
@@ -40,15 +55,17 @@ const createUser = async (userData) => {
 
         // Insert the new user into the database
         const [queryResponse] = await db.query(
-            'INSERT INTO `users` (`first_name`, `last_name`, `mobile`, `email`, `password`, `access_password`) VALUES (?, ?, ?, ?, ?, ?)',
-            [first_name, last_name, mobile, email, password, access_password]
+            'INSERT INTO `users` (`name`, `mobile`, `email`, `password`) VALUES (?, ?, ?, ?)',
+            [name, mobile, email, hashedPassword]
         );
 
+        // Return the inserted user's ID
         return queryResponse.insertId;
     } catch (err) {
-        throw new Error(err.message);
+        // Handle errors and provide more context
+        console.error('Error creating user:', err.message);  // Log the error for debugging
+        throw new Error(err.message || 'An error occurred while creating the user.');
     }
-
 };
 
 const updateUser = async (id, userData) => {
@@ -79,4 +96,5 @@ module.exports = {
     createUser,
     updateUser,
     deleteUser,
+    loginUsers
 };

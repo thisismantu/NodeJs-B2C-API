@@ -28,7 +28,10 @@ exports.createUser = async (req, res) => {
         const user_id = await User.createUser(req.body);
         res.status(201).json({ message: 'User created successfully', user_id });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({
+            status: 500,
+            error: err.message || 'An unexpected error occurred',
+        });
     }
 };
 
